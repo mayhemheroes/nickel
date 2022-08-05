@@ -59,6 +59,15 @@ where
     }
 }
 
+// We can't satisfy clippy and implement `From<Ident> for String`. Otherwise, the generic
+// implementation above will give a second way of deriving `From<Ident> for Ident`:
+//
+// - the identity, provided by core (impl From<T> for T)
+// - `String::from::<Ident>` -> `Ident::from::<String>`, given by the implementation above.
+//
+// And the compiler is unhappy (and the second implementation would silently erase the position).
+// Hence, we disable the clippy lint, because being able to write `Ident::from("foo")` is nice.
+#[allow(clippy::from_over_into)]
 impl Into<String> for Ident {
     fn into(self) -> String {
         self.label

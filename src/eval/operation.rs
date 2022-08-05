@@ -85,6 +85,13 @@ impl std::fmt::Debug for OperationCont {
     }
 }
 
+/// Alleviate the long list of arguments passed to the functions of this module.
+struct OpContext<'a> {
+    call_stack: &'a mut CallStack,
+    stack: &'a mut Stack,
+    pos_op: TermPos,
+}
+
 /// Process to the next step of the evaluation of an operation.
 ///
 /// Depending on the content of the stack, it either starts the evaluation of the first argument,
@@ -97,10 +104,13 @@ pub fn continuate_operation(
 ) -> Result<Closure, EvalError> {
     let (cont, cs_len, pos) = stack.pop_op_cont().expect("Condition already checked");
     call_stack.truncate(cs_len);
+    let ctxt = OpContext {
+        stack,
+        call_stack,
+        pos_op: pos,
+    };
     match cont {
-        OperationCont::Op1(u_op, arg_pos) => {
-            process_unary_operation(u_op, clos, arg_pos, stack, call_stack, pos)
-        }
+        OperationCont::Op1(u_op, arg_pos) => process_unary_operation(u_op, clos, arg_pos, ctxt),
         OperationCont::Op2First(b_op, mut snd_clos, fst_pos) => {
             std::mem::swap(&mut clos, &mut snd_clos);
             stack.push_op_cont(
@@ -110,9 +120,9 @@ pub fn continuate_operation(
             );
             Ok(clos)
         }
-        OperationCont::Op2Second(b_op, fst_clos, fst_pos, snd_pos) => process_binary_operation(
-            b_op, fst_clos, fst_pos, clos, snd_pos, stack, call_stack, pos,
-        ),
+        OperationCont::Op2Second(b_op, fst_clos, fst_pos, snd_pos) => {
+            process_binary_operation(b_op, fst_clos, fst_pos, clos, snd_pos, ctxt)
+        }
         OperationCont::OpN {
             op,
             mut evaluated,
@@ -150,14 +160,17 @@ fn process_unary_operation(
     u_op: UnaryOp,
     clos: Closure,
     arg_pos: TermPos,
-    stack: &mut Stack,
-    call_stack: &mut CallStack,
-    pos_op: TermPos,
+    ctxt: OpContext<'_>,
 ) -> Result<Closure, EvalError> {
     let Closure {
         body: RichTerm { term: t, pos },
         mut env,
     } = clos;
+    let OpContext {
+        call_stack,
+        stack,
+        pos_op,
+    } = ctxt;
     let pos_op_inh = pos_op.into_inherited();
 
     match u_op {
@@ -1102,11 +1115,9 @@ fn process_binary_operation(
     b_op: BinaryOp,
     fst_clos: Closure,
     fst_pos: TermPos,
-    clos: Closure,
+    snd_clos: Closure,
     snd_pos: TermPos,
-    stack: &mut Stack,
-    call_stack: &mut CallStack,
-    pos_op: TermPos,
+    ctxt: OpContext<'_>,
 ) -> Result<Closure, EvalError> {
     let Closure {
         body: RichTerm {
@@ -1121,7 +1132,12 @@ fn process_binary_operation(
             pos: pos2,
         },
         env: mut env2,
-    } = clos;
+    } = snd_clos;
+    let OpContext {
+        stack,
+        call_stack,
+        pos_op,
+    } = ctxt;
     let pos_op_inh = pos_op.into_inherited();
 
     match b_op {

@@ -219,6 +219,11 @@ impl CallStack {
         self.0.len()
     }
 
+    /// Returns `true` if the callstack contains no elements.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Truncate the callstack at a certain size. Used e.g. to quickly drop the elements introduced
     /// during the strict evaluation of the operand of a primitive operator. Wrapper for
     /// `callstack.0.truncate(len)`.

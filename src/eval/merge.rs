@@ -318,6 +318,8 @@ pub fn merge(
                 .into_iter()
                 .map(|ctr| ctr.closurize(&mut env, env1.clone()))
                 .collect();
+            // See https://github.com/rust-lang/rust-clippy/issues/6164
+            #[allow(clippy::needless_collect)]
             let contracts2: Vec<Contract> = contracts2
                 .into_iter()
                 .map(|ctr| ctr.closurize(&mut env, env2.clone()))
@@ -523,13 +525,14 @@ fn rev_thunks<'a, I: Iterator<Item = &'a mut RichTerm>>(map: I, env: &mut Enviro
 pub mod hashmap {
     use std::collections::HashMap;
 
+    /// The result of the splitting of two hashmaps with keys of type `K` and values of type
+    /// respectively `V1` and `V2`.
+    pub type Split<K, V1, V2> = (HashMap<K, V1>, HashMap<K, (V1, V2)>, HashMap<K, V2>);
+
     /// Split two hashmaps m1 and m2 in three parts (left,center,right), where left holds bindings
     /// `(key,value)` where key is not in `m2.keys()`, right is the dual (keys of m2 that are not
     /// in m1), and center holds bindings for keys that are both in m1 and m2.
-    pub fn split<K, V1, V2>(
-        m1: HashMap<K, V1>,
-        m2: HashMap<K, V2>,
-    ) -> (HashMap<K, V1>, HashMap<K, (V1, V2)>, HashMap<K, V2>)
+    pub fn split<K, V1, V2>(m1: HashMap<K, V1>, m2: HashMap<K, V2>) -> Split<K, V1, V2>
     where
         K: std::hash::Hash + Eq,
     {
