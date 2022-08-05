@@ -175,6 +175,21 @@
                   "^RELEASES\\.md$"
                 ];
               };
+              clippy =
+                let
+                  allow = [
+                    "clippy::new-without-default"
+                    "clippy::match_like_matches_macro"
+                  ];
+                  allowOpts = builtins.concatStringsSep " "
+                    (builtins.map (lint: "-A \"${lint}\"") allow);
+                in
+                {
+                  enable = true;
+                  entry = pkgs.lib.mkForce ''
+                    ${rust}/bin/cargo-clippy clippy --frozen --no-deps -- -D warnings ${allowOpts}
+                  '';
+                };
             };
           };
 
