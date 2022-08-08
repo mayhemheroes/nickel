@@ -233,7 +233,7 @@
             rm $out/.crates.toml
           '';
 
-          shellHook = pre-commit.shellHook { isDevShell = true; } + ''
+          shellHook = (pre-commit { isDevShell = true; }).shellHook + ''
             echo "=== Nickel development shell ==="
             echo "Info: Git hooks can be installed using \`pre-commit install\`"
           '';
