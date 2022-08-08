@@ -233,12 +233,12 @@
             rm $out/.crates.toml
           '';
 
-          shellHook = pre-commit.shellHook + ''
+          shellHook = pre-commit.shellHook { isDevShell = true; } + ''
             echo "=== Nickel development shell ==="
             echo "Info: Git hooks can be installed using \`pre-commit install\`"
           '';
 
-          passthru = { inherit rust pre-commit; };
+          passthru = { inherit rust; pre-commit = pre-commit { }; };
 
           RUST_SRC_PATH = "${rust}/lib/rustlib/src/rust/library";
         };
