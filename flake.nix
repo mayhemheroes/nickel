@@ -153,8 +153,15 @@
 
           rust = mkRust { inherit rustProfile channel target; };
 
-          pre-commit = pre-commit-hooks.lib.${system}.run {
+          pre-commit = { isDevShell ? false }: pre-commit-hooks.lib.${system}.run {
             src = self;
+            # For some reason, clippy requires an access to the crate registry.
+            # When pre-commit-hooks are run as part of the CI, this is not
+            # possible, so we need to depend on the cargo home, as for building
+            # Nickel. On the other hand, I suppose users of the dev shell don't
+            # care about cargo pulling things from the network in a development
+            # workflow.
+            buildInputs = if isDevShell then [ ] else [ cargoHome ];
             hooks = {
               nixpkgs-fmt = {
                 enable = true;
@@ -183,11 +190,14 @@
                   ];
                   allowOpts = builtins.concatStringsSep " "
                     (builtins.map (lint: "-A \"${lint}\"") allow);
+                  offlineOpts = if isDevShell then "" else "--frozen --offline";
                 in
                 {
                   enable = true;
                   entry = pkgs.lib.mkForce ''
-                    ${rust}/bin/cargo-clippy clippy --no-deps -- -D warnings ${allowOpts}
+                    ${rust}/bin/cargo-clippy clippy \
+                        --workspace --no-deps ${offlineOpts} -- \
+                        -D warnings ${allowOpts}
                   '';
                 };
             };
