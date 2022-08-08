@@ -187,7 +187,7 @@
                 {
                   enable = true;
                   entry = pkgs.lib.mkForce ''
-                    ${rust}/bin/cargo-clippy clippy --frozen --no-deps -- -D warnings ${allowOpts}
+                    ${rust}/bin/cargo-clippy clippy --no-deps -- -D warnings ${allowOpts}
                   '';
                 };
             };
