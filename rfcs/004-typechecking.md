@@ -11,12 +11,12 @@ The goals of this RFC are:
 1. Identify the main shortcomings of the current implementation of typechecking,
    in particular with respect to the interaction between typed and untyped code.
 2. Write a proper formalization of a type system and companion type inference
-   algorithm which overcomes those limitations as much as possible. If this
-   proves too hard, even just a proper definition and formalization of the
-   current type system would already be a positive outcome.
+   algorithm which overcome those limitations as much as possible. If this
+   proves too hard, a proper definition and formalization of the current type
+   system would already be a positive outcome.
 
 The motivation for the first step is self-explanatory: a more expressive type
-system directly translate to users being able to write more programs (or clearer
+system directly translates to users being able to write more programs (or clearer
 versions of the same program, without superfluous annotations).
 
 The second step is motivated by improving the experience of extending the type
@@ -103,11 +103,11 @@ The important dimensions of typing in Nickel are:
 
 ## Motivation
 
-This sections attempts to motivate this RFC practically: what are programs that
+This section attempts to motivate this RFC practically: what are programs which
 are natural write and that we expect to be accepted by the typechecker, but
 aren't currently?
 
-### Dynamic
+### The dynamic type
 
 The dynamic type acts as a top type statically (with a caveat though[^2]), like
 `Any` or `Object` in some languages. Although casts from the dynamic type are
@@ -168,7 +168,7 @@ let fake_id
 fake_id 10
 ```
 
-**Remark**: currently (as of version 0.1.0) this just returns false, but this is
+**Remark**: currently (as of version 0.2.1) this just returns false, but this is
 a bug, see [#727](https://github.com/tweag/nickel/issues/727).
 
 Any typed function that needs to inspect its argument needs to use `Dyn`, or at
@@ -232,10 +232,10 @@ mutuallyExclusive: forall a. Array a -> Array a -> Bool
 
 Another possible future use-case is [flow-sensitive
 typing](https://en.wikipedia.org/wiki/Flow-sensitive_typing), as in e.g.
-TypeScript. If we are to implement such a feeature in Nickel, taking an argument
-of type `Dyn` and type-casing(using `builtin.typeof` or `builtin.is_xxx`) would
-make sense inside statically typed code, naturally producing functions that
-consume values of type `Dyn`. Here is another example from the Nixpkgs list
+TypeScript. If we are to implement such a feature in Nickel, taking an argument
+of type `Dyn` and then type-casing (using `builtin.typeof` or `builtin.is_xxx`)
+would make sense inside statically typed code, naturally producing functions
+that consume values of type `Dyn`. Here is another example from the Nixpkgs list
 library which could use flow-sensitive typing:
 
 ```nickel
@@ -348,7 +348,7 @@ error: incompatible types
 ## Proposal
 
 Given the precedent sections, we propose to add a subtyping relation generated
-by `T <: Dyn` for all type `T` that is not a type variable, and `{ l1 : T, ..,
+by `T <: Dyn` for all type `T` that is not a type variable, and `{l1 : T, ..,
 ln : T} <: {_: T}` for the dictionaries use-case. Data structure are covariant,
 and the arrow has the usual co/contra-variance.
 
@@ -383,8 +383,8 @@ uni_pair foo 1 : _
 ```
 
 Unfortunately, we don't have yet a good characterization of this as a property
-of the declarative type system or type inference . It is an informal guideline,
-which is only reflected in the algorithmic type inference for now.
+of the declarative type system or declarative type inference. It is an informal
+guideline, which is only reflected in the algorithmic type inference for now.
 
 ### Polymorphism and subtyping
 
@@ -404,12 +404,13 @@ typing of Dunfield and Krishnaswami](https://arxiv.org/abs/1908.05839).
 Surprisingly, it doesn't seem to have been deeply studied (outside of the
 subtyping relation induced by polymorphism). For subtyping induced by
 polymorphism, there are different trade-offs: Dunfield and Krishnaswami
-restricts their system to impredicative polymorphism, which is then
+restricts their system to predicative polymorphism, which is then
 order-independent [^3]. In exchange, the arrow type has the expected variance
 (that is, eta-expansion preserves typeability). On the other hand, Haskell
 deemed impredicative polymorphism to be more important and chose to abandon the
 variance of arrows and other type constructors. Coupled with a so-called
-QuickLook phase, Haskell is able to most common impredicative instantiations.
+QuickLook phase, Haskell is able to guess most common impredicative
+instantiations.
 
 We can't apply the Haskell approach naively, because in the presence of `Dyn`,
 an impredicative instantiation is not the only possibility anymore, even if we
@@ -435,8 +436,8 @@ it has potential heading `forall`s which need to be instantiated.
 We may extend the QuickLook phase to also cover `Dyn`, but this needs more
 investigation. Another fix could be to make all type constructors invariant also
 for the subtyping relation generated by `Dyn`, but that is quite restrictive in
-practice (several examples in this document would need `Array T <: Array Dyn`,
-to get rid of the casts).
+practice (several examples in this document would need `Array T <: Array Dyn` in
+order to get rid of the casts).
 
 ### Packing up
 
