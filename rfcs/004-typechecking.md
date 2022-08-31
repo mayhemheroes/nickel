@@ -440,7 +440,7 @@ to get rid of the casts).
 
 ### Packing up
 
-To sum up (**TODO**: better wording):
+To sum up:
 
 - We only want to infer `Dyn` because of an explicit type annotation.
 - Polymorphism and subtyping interact in a non trivial way. It is not obvious
