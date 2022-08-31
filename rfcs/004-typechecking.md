@@ -134,10 +134,10 @@ annotations:
 ```nickel
 {
   serialized : Arry Str =
-    let data = {script = "echo ${hello}", vars = ["hello"] } in
+    let some_data = {script = "echo ${hello}", vars = ["hello"] } in
     let other_data = ["one", "two", "three"] in
     [
-      builtin.serialize `Json (data | Dyn),
+      builtin.serialize `Json (some_data | Dyn),
       builtin.serialize `Yaml (other_data | Dyn)
     ]
 }
