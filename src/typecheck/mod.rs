@@ -267,6 +267,7 @@ fn walk<L: Linearizer>(
             walk(state, env, lin, linearizer, t)
         }
         Term::Array(terms, _) => terms
+            .as_ref()
             .iter()
             .try_for_each(|t| -> Result<(), TypecheckError> {
                 walk(state, env.clone(), lin, linearizer.scope(), t)
@@ -527,6 +528,7 @@ fn type_check_<L: Linearizer>(
                 .map_err(|err| err.into_typecheck_err(state, rt.pos))?;
 
             terms
+                .as_ref()
                 .iter()
                 .try_for_each(|t| -> Result<(), TypecheckError> {
                     type_check_(

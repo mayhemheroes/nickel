@@ -8,6 +8,7 @@ use serde::de::{
 };
 
 use crate::identifier::Ident;
+use crate::term::array::Array;
 use crate::term::{MetaValue, RichTerm, Term};
 
 macro_rules! deserialize_number {
@@ -387,15 +388,12 @@ fn unwrap_term(mut rich_term: RichTerm) -> Result<Term, RustDeserializationError
     }
 }
 
-fn visit_array<'de, V>(
-    array: Vec<RichTerm>,
-    visitor: V,
-) -> Result<V::Value, RustDeserializationError>
+fn visit_array<'de, V>(array: Array, visitor: V) -> Result<V::Value, RustDeserializationError>
 where
     V: Visitor<'de>,
 {
     let len = array.len();
-    let mut deserializer = ArrayDeserializer::new(array);
+    let mut deserializer = ArrayDeserializer::new(array.into_iter().collect());
     let seq = visitor.visit_seq(&mut deserializer)?;
     let remaining = deserializer.iter.len();
     if remaining == 0 {

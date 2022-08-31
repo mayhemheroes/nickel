@@ -192,8 +192,9 @@ fn contract_eq_bounded(
         (Array(ts1, attrs1), Array(ts2, attrs2)) => {
             ts1.len() == ts2.len()
                 && ts1
+                    .as_ref()
                     .iter()
-                    .zip(ts2.iter())
+                    .zip(ts2.as_ref().iter())
                     .all(|(t1, t2)| contract_eq_bounded(state, t1, env1, t2, env2))
                 && attrs1 == attrs2
         }

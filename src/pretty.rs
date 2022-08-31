@@ -614,10 +614,15 @@ where
             Array(fields, _) => allocator
                 // NOTE: the Array attributes are ignored here.
                 .line()
-                .append(allocator.intersperse(
-                    fields.iter().map(|rt| rt.to_owned().pretty(allocator)),
-                    allocator.text(",").append(allocator.line()),
-                ))
+                .append(
+                    allocator.intersperse(
+                        fields
+                            .as_ref()
+                            .iter()
+                            .map(|rt| rt.to_owned().pretty(allocator)),
+                        allocator.text(",").append(allocator.line()),
+                    ),
+                )
                 .nest(2)
                 .append(allocator.line())
                 .group()

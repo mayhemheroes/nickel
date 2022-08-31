@@ -1,12 +1,14 @@
 //! Serialization of an evaluated program to various data format.
 use crate::error::SerializationError;
 use crate::identifier::Ident;
+use crate::term::array::Array;
 use crate::term::{ArrayAttrs, MetaValue, RecordAttrs, RichTerm, Term};
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Error, Serialize, SerializeMap, SerializeSeq, Serializer};
 use std::collections::HashMap;
 use std::fmt;
 use std::io;
+use std::rc::Rc;
 use std::str::FromStr;
 
 /// Available export formats.
@@ -125,7 +127,7 @@ where
 
 /// Serialize for an Array. Required to hide the internal attributes.
 pub fn serialize_array<S>(
-    terms: &Vec<RichTerm>,
+    terms: &Array,
     _attrs: &ArrayAttrs,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -133,7 +135,7 @@ where
     S: Serializer,
 {
     let mut seq = serializer.serialize_seq(Some(terms.len()))?;
-    for term in terms.iter() {
+    for term in terms.as_ref().iter() {
         seq.serialize_element(term)?;
     }
 
@@ -141,11 +143,11 @@ where
 }
 
 /// Deserialize for an Array. Required to set the default attributes.
-pub fn deserialize_array<'de, D>(deserializer: D) -> Result<(Vec<RichTerm>, ArrayAttrs), D::Error>
+pub fn deserialize_array<'de, D>(deserializer: D) -> Result<(Array, ArrayAttrs), D::Error>
 where
     D: Deserializer<'de>,
 {
-    let terms: Vec<RichTerm> = Vec::deserialize(deserializer)?;
+    let terms = Array::new(Rc::from(Vec::deserialize(deserializer)?));
     Ok((terms, Default::default()))
 }
 
@@ -192,7 +194,7 @@ pub fn validate(format: ExportFormat, t: &RichTerm) -> Result<(), SerializationE
                 Ok(())
             }
             Array(vec, _) => {
-                vec.iter().try_for_each(|t| validate(format, t))?;
+                vec.as_ref().iter().try_for_each(|t| validate(format, t))?;
                 Ok(())
             }
             //TODO: have a specific error for such missing value.

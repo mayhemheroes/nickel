@@ -621,9 +621,11 @@ where
             Term::Array(terms, attrs) if !attrs.closurized => {
                 let mut local_env = Environment::new();
                 let closurized_array = terms
-                    .iter()
-                    .map(|t| t.clone().closurize(&mut local_env, env.clone()))
+                    .clone()
+                    .into_iter()
+                    .map(|t| t.closurize(&mut local_env, env.clone()))
                     .collect();
+
                 Closure {
                     body: RichTerm::new(
                         Term::Array(closurized_array, ArrayAttrs { closurized: true }),
