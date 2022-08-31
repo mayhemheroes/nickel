@@ -119,10 +119,10 @@ currently isn't smart enough and requires explicit annotations:
 # not equal to `Dyn`
 {
   serialized : Array Str =
-    let data = {script = "echo ${hello}", vars = ["hello"] } in
+    let some_data = {script = "echo ${hello}", vars = ["hello"] } in
     let other_data = ["one", "two", "three"] in
     [
-      builtin.serialize `Json data,
+      builtin.serialize `Json some_data,
       builtin.serialize `Yaml other_data
     ]
 }
