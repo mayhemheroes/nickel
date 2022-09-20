@@ -1,0 +1,7 @@
+project: nickel
+target: parsing
+
+cmds:
+  - cmd: /parsing
+  - cmd: /parsing_no_inst @@
+    libfuzzer: false
