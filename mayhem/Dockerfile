@@ -1,9 +1,15 @@
 # Build Stage
-FROM ghcr.io/evanrichter/cargo-fuzz:latest as builder
+FROM ghcr.io/evanrichter/cargo-fuzz:latest AS builder
 
 ## Add source code to the build stage.
 ADD . /src
 WORKDIR /src
+
+# The base image ships an old nightly; nickel requires edition 2024 (Rust >= 1.85).
+# Reinstall the toolchain fresh (rather than `rustup update`) to avoid an
+# overlayfs cross-device rename error when replacing pre-existing components.
+RUN rustup toolchain uninstall nightly && \
+    rustup toolchain install nightly --profile minimal --component rust-src
 
 RUN echo building instrumented harnesses && \
     bash -c "pushd fuzz && cargo +nightly -Z sparse-registry fuzz build && popd" && \

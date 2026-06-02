@@ -10,8 +10,8 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 
-[dependencies.nickel-lang]
-path = ".."
+[dependencies.nickel-lang-core]
+path = "../core"
 default-features = false
 features = ["doc"]
 
