@@ -11,9 +11,7 @@
 
 name: benchmark pull requests
 on:
-  pull_request:
-    types: [opened, reopened, edited, synchronize]
-
+  workflow_dispatch:
 jobs:
   benchmark-pr:
     name: benchmark pr

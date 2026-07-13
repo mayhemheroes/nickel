@@ -1,11 +1,6 @@
 name: Continuous integration
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-  merge_group:
-
+  workflow_dispatch:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

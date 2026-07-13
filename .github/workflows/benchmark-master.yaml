@@ -1,7 +1,6 @@
 name: benchmark master
 on:
-  push:
-    branches: master
+  workflow_dispatch:
 jobs:
   benchmark-master:
     name: benchmark master
