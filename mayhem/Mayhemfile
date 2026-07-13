@@ -1,0 +1,15 @@
+# nickel parsing in-process libFuzzer target (cargo-fuzz / libfuzzer-sys).
+# Port of the original fork's `parsing` harness: parse arbitrary bytes as a
+# Nickel program, walk-typecheck it, and extract/serialize its documentation.
+project: mayhemheroes/nickel
+target: parsing
+image: mayhemheroes/nickel:latest
+
+cmds:
+  - cmd: /mayhem/parsing
+    libfuzzer: true
+
+# Benign seed corpus (spec §9): server-accumulated tar + canonical per-target path.
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/parsing/testsuite
